@@ -1,0 +1,393 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'SimSun', serif;
+    overflow: hidden;
+    height: 100vh;
+    background-color: #000;
+    color: #fff;
+}
+
+/* 初始黑幕 */
+.black-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    z-index: 100;
+    opacity: 1;
+    transition: opacity 2.5s ease-out;
+}
+
+/* 开端文字 */
+.start-text {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 90;
+    text-align: center;
+    opacity: 1;
+    transition: opacity 1.5s ease-out;
+    pointer-events: auto;
+    width: 90%;
+    max-width: 500px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.start-text p {
+    font-size: clamp(1.4rem, 5vw, 2rem);
+    margin-bottom: 1.8rem;
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
+    opacity: 1;
+    line-height: 1.6;
+}
+
+.start-text .note {
+    font-size: clamp(1rem, 3.5vw, 1.4rem);
+    color: #e0e0e0;
+    margin-top: 2rem;
+}
+
+.start-game {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    opacity: 0;
+    transition: opacity 2s ease-in;
+    pointer-events: none;
+}
+
+.start-game.active{
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.start-game p {
+    font-size: clamp(1.4rem, 5vw, 2rem);
+    margin-top: 5rem;
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
+    opacity: 1;
+    text-align: center;
+}
+
+.ground0 {
+    position: absolute;
+    bottom: 29%;
+    left: 45%;
+    width: 10%;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.3);
+    z-index: 3;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.target-spot {
+  position: absolute;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff, #ffeb3b, #ff9800);
+    box-shadow: 0 0 15px #ffeb3b, 0 0 30px #ff9800;
+    z-index: 3;
+    animation: pulse 2s infinite alternate;
+    cursor: default;
+    left: 50%; /* 和人物初始水平位置对齐 */
+    bottom: 45%; /* 比人物初始位置高15%（30%+15%），需要跳跃才能碰到 */
+}
+
+/* 游戏容器 */
+.game-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    opacity: 0;
+    transition: opacity 2s ease-in;
+    pointer-events: none;
+}
+
+.game-container.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* 背景 */
+.background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('https://p26-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/8cd522b5bb1f4ed1916dc226c043ac05.jpg~tplv-a9rns2rl98-24-95-exif:960:960.image?rcl=20251108121930902A177B2771FBE7E5D9&rk3s=8e244e95&rrcfp=8a172a1a&x-expires=1763180371&x-signature=EZ9v5K30MhamKMWvrb%2FjGQMWH8g%3D') center/cover no-repeat;
+    filter: brightness(0.4) contrast(1.2);
+    z-index: 1;
+}
+
+/* 水波纹效果 */
+.water-ripple {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30%;
+    background: linear-gradient(to top, rgba(0, 30, 60, 0.5), transparent);
+    z-index: 2;
+    overflow: hidden;
+}
+
+.water-ripple::before {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 30px 30px;
+    animation: ripple 15s linear infinite;
+}
+
+/* 地面 */
+.ground {
+    position: absolute;
+    bottom: 30%;
+    left: 0;
+    width: 100%;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.3);
+    z-index: 3;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+/* 小人 */
+.player {
+    position: absolute;
+    bottom: 30%;
+    left: 50%;
+    width: 40px;
+    height: 60px;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 30%, rgba(200, 220, 255, 0.6) 70%, transparent 100%);
+    border-radius: 50% 50% 40% 40%;
+    box-shadow: 0 0 20px rgba(200, 220, 255, 0.8),
+                0 0 40px rgba(150, 200, 255, 0.5);
+    z-index: 4;
+    transition: left 0.3s ease-out;
+}
+
+.player::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    filter: blur(5px);
+}
+
+/* 右上角进度圈 */
+.progress-circles {
+    position: absolute;
+    top: 5%;
+    right: 5%;
+    display: flex;
+    gap: 15px;
+    z-index: 5;
+}
+
+.circle {
+    width: 30px;
+    height: 30px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    transition: all 0.5s ease;
+    overflow: hidden;
+}
+
+.circle.filled {
+    background: linear-gradient(135deg, #87ceeb, #ffffff);
+    box-shadow: 0 0 15px rgba(135, 206, 235, 0.8);
+    border-color: #ffffff;
+}
+
+/* 光点 */
+.light-spot {
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff, #ffeb3b, #ff9800);
+    box-shadow: 0 0 15px #ffeb3b, 0 0 30px #ff9800;
+    z-index: 3;
+    animation: pulse 2s infinite alternate;
+    cursor: default;
+}
+
+/* 问答界面 */
+.quiz-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1s ease;
+}
+
+.quiz-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.quiz-content {
+    width: 90%;
+    max-width: 500px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 0 30px rgba(135, 206, 235, 0.5);
+    text-align: center;
+}
+
+.quiz-question {
+    font-size: 1.5rem;
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+
+.quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.quiz-option {
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.quiz-option:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(135, 206, 235, 0.4);
+}
+
+/* 操控按钮 */
+.controls {
+    position: absolute;
+    bottom: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 60px;
+    z-index: 5;
+}
+
+.jump-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(5px);
+}
+
+.jump-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+.jump-btn:active {
+    transform: scale(0.95);
+}
+
+.btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(5px);
+}
+
+.btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+.btn:active {
+    transform: scale(0.95);
+}
+
+/* 动画 */
+@keyframes pulse {
+    from { opacity: 0.6; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1.1); }
+}
+
+@keyframes ripple {
+    0% { transform: rotate(0deg) translate(-50%, -50%); }
+    100% { transform: rotate(360deg) translate(-50%, -50%); }
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .controls {
+        gap: 40px;
+    }
+    
+    .btn, .jump-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+    
+    .player {
+        width: 30px;
+        height: 45px;
+    }
+    
+    .circle {
+        width: 25px;
+        height: 25px;
+    }
+    
+    .light-spot {
+        width: 20px;
+        height: 20px;
+    }
+}

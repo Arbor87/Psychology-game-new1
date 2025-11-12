@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心理小游戏·跳跃收集版</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 初始黑幕 -->
+    <div class="black-mask"></div>
+    
+    <!-- 开端文字 -->
+    <div class="start-text">
+        <p>站在黑暗中，冰河流淌</p>
+        <p>现在，让掌心的微光，去触碰</p>
+        <p>散落的第一枚碎片</p>
+        <p>—— 启幕</p>
+        <p class="note">(点击任意位置开始游戏)</p>
+    </div>
+    
+    <!--游戏初始界面-->
+    <div class="start-game">
+        <p>控制小人去触碰光点</p>
+        <div class="water-ripple"></div>
+        <div class="target-spot"></div>
+        <div class="ground0"></div>
+        <div class="player"></div>
+    </div>
+
+    <!-- 游戏界面 -->
+    <div class="game-container">
+        <div class="background"></div>
+        <div class="water-ripple"></div>
+        <div class="ground"></div> <!-- 地面 -->
+        <div class="player"></div>
+        
+        <!-- 右上角进度圈 -->
+        <div class="progress-circles">
+            <div class="circle"></div>
+            <div class="circle"></div>
+            <div class="circle"></div>
+        </div>
+        
+        <!-- 操控按钮（含跳跃） -->
+        <div class="controls">
+            <button class="btn" id="leftBtn">←</button>
+            <button class="jump-btn" id="jumpBtn">↑</button>
+            <button class="btn" id="rightBtn">→</button>
+        </div>
+    </div>
+
+    <!-- 问答界面 -->
+    <div class="quiz-modal" id="quizModal">
+        <div class="quiz-content">
+            <div class="quiz-question">当你感到迷茫时，更倾向于？</div>
+            <div class="quiz-options">
+                <div class="quiz-option">独自思考，寻找内心答案</div>
+                <div class="quiz-option">向身边信任的人倾诉</div>
+                <div class="quiz-option">通过行动打破僵局</div>
+                <div class="quiz-option">暂时搁置，等待灵感</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="test.js"></script>
+</body>
+</html>
