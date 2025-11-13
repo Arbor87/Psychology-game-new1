@@ -12,7 +12,28 @@ window.addEventListener('DOMContentLoaded', () => {
     const jumpBtn = document.getElementById('jumpBtn');
     const progressCircles = document.querySelectorAll('.circle');
     const quizModal = document.getElementById('quizModal');
-    const quizOptions = document.querySelectorAll('.quiz-option');
+    const textContent = document.getElementById('textContent');
+    const quizOptions = document.getElementById('quizOptions');
+    const backButton = document.getElementById('backButton');
+    const optionA = document.getElementById('optionA');
+    const optionB = document.getElementById('optionB');
+    
+    // 第二个弹窗元素
+    const quizModal2 = document.getElementById('quizModal2');
+    const textContent2 = document.getElementById('textContent2');
+    const quizOptions2 = document.getElementById('quizOptions2');
+    const backButton2 = document.getElementById('backButton2');
+    const optionA2 = document.getElementById('optionA2');
+    const optionB2 = document.getElementById('optionB2');
+    
+    // 假结局弹窗元素
+    const badEndingModal = document.getElementById('badEndingModal');
+    const badEndingContent = document.getElementById('badEndingContent');
+    const badEndingText = document.getElementById('badEndingText');
+    const badEndingBackButton = document.getElementById('badEndingBackButton');
+    
+    // 游戏状态变量 - 用于跟踪当前是第几个弹窗
+    let currentStage = 1; // 1: 第一个弹窗阶段, 2: 第二个弹窗阶段
     
     // 当前活动的玩家元素
     let player = startPlayer; // 默认使用开始界面的人物
@@ -31,7 +52,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }, 100);
     
     // 点击任意位置启动游戏
-    document.addEventListener('click', () => {
+    document.addEventListener('click', function startGame() {
         startText.style.opacity = '0';
         blackMask.style.opacity = '0';
         startgame.classList.add('active');
@@ -52,7 +73,10 @@ window.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             blackMask.style.display = 'none';
         }, 2000);
-    }, { once: true });
+        
+        // 移除事件监听器，确保只触发一次
+        document.removeEventListener('click', startGame);
+    });
     
 
 
@@ -60,7 +84,16 @@ window.addEventListener('DOMContentLoaded', () => {
     let audioContext;
     function createWaterSound() {
         try {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            // 在移动设备上，音频上下文必须在用户交互后初始化
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // 检查是否需要恢复音频上下文（某些浏览器可能会自动挂起）
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+            }
+            
             const gainNode = audioContext.createGain();
             gainNode.gain.value = 0.1;
             gainNode.connect(audioContext.destination);
@@ -100,6 +133,7 @@ window.addEventListener('DOMContentLoaded', () => {
             modulator2.start();
         } catch (e) {
             console.log('音频初始化失败:', e);
+            // 音频初始化失败不应阻止游戏继续运行
         }
     }
     
@@ -209,10 +243,14 @@ function checkCollision() {
                         progressCircles[collectedSpots - 1].classList.add('filled');
                     }
                     
-                    // 集满3个光点，显示问答界面
+                    // 集满3个光点，根据当前阶段显示对应的弹窗
                     if (collectedSpots === maxSpots) {
                         setTimeout(() => {
-                            quizModal.classList.add('active');
+                            if (currentStage === 1) {
+                                quizModal.classList.add('active');
+                            } else if (currentStage === 2) {
+                                quizModal2.classList.add('active');
+                            }
                         }, 500);
                     }
                 }
@@ -329,55 +367,237 @@ function checkCollision() {
     
     // 触摸控制（左右滑动+上下滑动跳跃+点击跳跃）
     let touchStartX = 0;
-    let touchStartY = 0; // 新增：记录触摸起始Y坐标
+    let touchStartY = 0;
+    let touchStartTime = 0;
 
+    // 改进的触摸开始处理
     document.addEventListener('touchstart', (e) => {
+        // 防止默认行为，特别是在iOS上的滚动
+        e.preventDefault();
         touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY; // 记录起始Y坐标
-    }, false);
+        touchStartY = e.touches[0].clientY;
+        touchStartTime = Date.now(); // 记录触摸开始时间
+    }, { passive: false });
 
+    // 改进的触摸结束处理
     document.addEventListener('touchend', (e) => {
-    if (!touchStartX || !touchStartY) return;
-    
-    const touchEndX = e.changedTouches[0].clientX;
-    const touchEndY = e.changedTouches[0].clientY; // 记录结束Y坐标
-    const diffX = touchEndX - touchStartX;
-    const diffY = touchEndY - touchStartY; // 计算Y轴滑动距离（负值=往上滑）
+        e.preventDefault();
+        
+        if (!touchStartX || !touchStartY) return;
+        
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        const diffX = touchEndX - touchStartX;
+        const diffY = touchEndY - touchStartY;
+        const touchDuration = Date.now() - touchStartTime; // 计算触摸持续时间
 
-    // 优先判断上下滑动（往上滑触发跳跃）
-    if (diffY < -30) { // 往上滑距离超过30px
-        jump(); // 直接使用已定义的jump()函数
-    } 
-    // 左右滑动移动（与原逻辑保持一致）
-    else if (diffX > 30 && positionX < 90) {
-        positionX += 10;
-        player.style.left = `${positionX}%`;
-        checkCollision();
-    } else if (diffX < -30 && positionX > 10) {
-        positionX -= 10;
-        player.style.left = `${positionX}%`;
-        checkCollision();
-    }
-    // 点击（无明显滑动）也触发跳跃
-    else if (Math.abs(diffX) < 30 && Math.abs(diffY) < 30) {
-        jump(); // 直接使用已定义的jump()函数
+        // 调整移动阈值，使其在移动设备上更加灵敏
+        const movementThreshold = 20; // 降低阈值以提高灵敏度
+        const tapThreshold = 200; // 点击持续时间阈值（毫秒）
+
+        // 优先判断上下滑动（往上滑触发跳跃）
+        if (diffY < -movementThreshold) {
+            jump();
+        } 
+        // 左右滑动移动
+        else if (diffX > movementThreshold && positionX < 90) {
+            // 根据滑动距离调整移动速度，使控制更自然
+            const moveAmount = Math.min(15, Math.abs(diffX) / 10);
+            positionX += moveAmount;
+            if (positionX > 90) positionX = 90; // 确保不超出边界
+            player.style.left = `${positionX}%`;
+            checkCollision();
+        } else if (diffX < -movementThreshold && positionX > 10) {
+            const moveAmount = Math.min(15, Math.abs(diffX) / 10);
+            positionX -= moveAmount;
+            if (positionX < 10) positionX = 10; // 确保不超出边界
+            player.style.left = `${positionX}%`;
+            checkCollision();
+        }
+        // 点击（短时间触摸）也触发跳跃
+        else if (Math.abs(diffX) < movementThreshold && Math.abs(diffY) < movementThreshold && touchDuration < tapThreshold) {
+            jump();
+        }
+        
+        // 重置起始坐标和时间
+        touchStartX = 0;
+        touchStartY = 0;
+        touchStartTime = 0;
+    }, { passive: false });
+    
+    // 添加触摸移动事件监听，提供更实时的反馈
+    document.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+    }, { passive: false });
+    
+    // 8. 文字界面和选项的交互逻辑
+    // 获取quiz-content元素
+    const quizContent = document.querySelector('#quizModal .quiz-content');
+    const quizContent2 = document.querySelector('#quizModal2 .quiz-content');
+    
+    // 第一个弹窗 - 文字界面点击事件 - 显示选项
+    quizContent.addEventListener('click', (e) => {
+        // 避免点击选项或返回按钮时触发
+        if (e.target === quizOptions || quizOptions.contains(e.target) || 
+            e.target === backButton || backButton.contains(e.target)) {
+            return;
+        }
+        
+        textContent.style.opacity = '0.3'; // 文字透明度降低
+        quizOptions.classList.add('active'); // 显示选项
+        backButton.classList.add('active'); // 显示返回按钮
+    });
+    
+    // 第二个弹窗 - 文字界面点击事件 - 显示选项
+    quizContent2.addEventListener('click', (e) => {
+        // 避免点击选项或返回按钮时触发
+        if (e.target === quizOptions2 || quizOptions2.contains(e.target) || 
+            e.target === backButton2 || backButton2.contains(e.target)) {
+            return;
+        }
+        
+        textContent2.style.opacity = '0.3'; // 文字透明度降低
+        quizOptions2.classList.add('active'); // 显示选项
+        backButton2.classList.add('active'); // 显示返回按钮
+    });
+    
+    // 第一个弹窗 - 返回按钮点击事件 - 返回文字界面
+    backButton.addEventListener('click', () => {
+        textContent.style.opacity = '1'; // 文字恢复正常显示
+        quizOptions.classList.remove('active'); // 隐藏选项
+        backButton.classList.remove('active'); // 隐藏返回按钮
+    });
+    
+    // 第二个弹窗 - 返回按钮点击事件 - 返回文字界面
+    backButton2.addEventListener('click', () => {
+        textContent2.style.opacity = '1'; // 文字恢复正常显示
+        quizOptions2.classList.remove('active'); // 隐藏选项
+        backButton2.classList.remove('active'); // 隐藏返回按钮
+    });
+    
+    // 选项A2点击事件
+optionA2.addEventListener('click', () => {
+    handleOptionSelection('A', 2);
+});
+
+// 选项B2点击事件
+optionB2.addEventListener('click', () => {
+    // 点击B选项时，显示假结局弹窗
+    quizModal2.classList.remove('active');
+    setTimeout(() => {
+        badEndingModal.classList.add('active');
+        // 添加这一行，确保按钮可见
+        badEndingBackButton.classList.add('active');
+    }, 500);
+});
+
+// 假结局弹窗重新开始按钮点击事件
+badEndingBackButton.addEventListener('click', () => {
+    badEndingModal.classList.remove('active');
+    
+    // 隐藏所有弹窗和控件
+    if (quizModal) quizModal.classList.remove('active');
+    if (quizModal2) quizModal2.classList.remove('active');
+    if (quizOptions) quizOptions.classList.remove('active');
+    if (quizOptions2) quizOptions2.classList.remove('active');
+    if (backButton) backButton.classList.remove('active');
+    if (backButton2) backButton2.classList.remove('active');
+    
+    const controls = document.querySelector('.controls');
+    if (controls) {
+        controls.classList.remove('active');
+        controls.style.display = 'none';
     }
     
-    // 重置起始坐标
-    touchStartX = 0;
-    touchStartY = 0;
-}, false);
+    // 重置游戏状态
+    collectedSpots = 0;
+    isFirstQuizAnswered = false;
+    isSecondQuizAnswered = false;
     
-    // 8. 问答选项点击事件（可扩展后续逻辑）
-    quizOptions.forEach(option => {
-        option.addEventListener('click', () => {
-            // 此处可添加选项选择后的逻辑（如计分、跳转下一关等）
+    // 重置进度圆圈
+    progressCircles.forEach(circle => circle.classList.remove('filled'));
+    
+    // 显示开始界面
+    setTimeout(() => {
+        // 重置开始界面
+        if (startText) startText.style.opacity = '1';
+        if (blackMask) blackMask.style.display = 'block';
+        if (startgame) {
+            startgame.classList.remove('active');
+            startgame.style.display = 'none';
+            startgame.style.opacity = '1';
+        }
+        
+        // 移除现有的游戏元素
+        if (gameContainer) {
+            gameContainer.classList.remove('active');
+            // 清空游戏容器中的光点
+            const lightSpots = gameContainer.querySelectorAll('.light-spot');
+            lightSpots.forEach(spot => spot.remove());
+        }
+        
+        // 重新绑定开始游戏事件
+        document.addEventListener('click', function startGame() {
+            if (startText) startText.style.opacity = '0';
+            if (startgame) {
+                startgame.classList.add('active');
+                startgame.style.display = 'block';
+            }
+            if (targetSpot) targetSpot.style.display = 'block';
+            if (startPlayer) {
+                startPlayer.style.display = 'block';
+                startPlayer.style.left = '50%';
+                startPlayer.style.bottom = '30%';
+            }
+            if (blackMask) blackMask.style.display = 'none';
+            document.removeEventListener('click', startGame);
+        });
+    }, 500);
+});
+    
+    // 处理选项选择的函数
+    function handleOptionSelection(option, stage) {
+        console.log('玩家在第', stage, '阶段选择了选项:', option);
+        
+        // 关闭对应的问答界面
+        if (stage === 1) {
             quizModal.classList.remove('active');
             
-            // 重置游戏状态，重新生成光点
-            collectedSpots = 0;
-            progressCircles.forEach(circle => circle.classList.remove('filled'));
-            setTimeout(generateLightSpots, 1000);
-        });
+            // 重置文字界面和选项的状态
+            setTimeout(() => {
+                textContent.style.opacity = '1';
+                quizOptions.classList.remove('active');
+                backButton.classList.remove('active');
+            }, 500);
+            
+            // 进入第二阶段
+            currentStage = 2;
+        } else if (stage === 2) {
+            quizModal2.classList.remove('active');
+            
+            // 重置文字界面和选项的状态
+            setTimeout(() => {
+                textContent2.style.opacity = '1';
+                quizOptions2.classList.remove('active');
+                backButton2.classList.remove('active');
+            }, 500);
+            
+            // 这里可以根据需要继续添加后续逻辑
+        }
+        
+        // 重置游戏状态，重新生成光点
+        collectedSpots = 0;
+        progressCircles.forEach(circle => circle.classList.remove('filled'));
+        setTimeout(generateLightSpots, 1000);
+    }
+    
+    // 选项A点击事件
+    optionA.addEventListener('click', () => {
+        handleOptionSelection('A', 1);
     });
+    
+    // 选项B点击事件
+    optionB.addEventListener('click', () => {
+        handleOptionSelection('B', 1);
+    })
 });
