@@ -265,38 +265,108 @@ body {
     padding: 30px;
     box-shadow: 0 0 30px rgba(135, 206, 235, 0.5);
     text-align: center;
+    position: relative;
 }
 
-.quiz-question {
-    font-size: 1.5rem;
-    margin-bottom: 25px;
-    line-height: 1.6;
+/* 文字内容样式 */
+.text-content {
+    opacity: 1;
+    transition: opacity 0.5s ease;
 }
 
+.text-content p {
+    font-size: 1.4rem;
+    margin-bottom: 1.2rem;
+    line-height: 1.8;
+    text-shadow: 0 0 8px rgba(135, 206, 235, 0.6);
+    animation: fadeIn 1s ease-in;
+}
+
+/* 选项样式 - 为A/B两个选项优化 */
 .quiz-options {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+}
+
+.quiz-options.active {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .quiz-option {
-    padding: 12px 20px;
+    padding: 15px 25px;
     background: rgba(255, 255, 255, 0.1);
     border: 2px solid rgba(255, 255, 255, 0.3);
-    border-radius: 10px;
+    border-radius: 15px;
     color: #fff;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-weight: bold;
 }
 
 .quiz-option:hover {
     background: rgba(255, 255, 255, 0.2);
     transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(135, 206, 235, 0.4);
+    box-shadow: 0 5px 20px rgba(135, 206, 235, 0.6);
+    border-color: rgba(255, 255, 255, 0.6);
 }
 
-/* 操控按钮 */
+/* 选项A特定样式 */
+#optionA, #optionA2 {
+    background: linear-gradient(135deg, rgba(135, 206, 235, 0.2), rgba(255, 255, 255, 0.1));
+}
+
+#optionA:hover, #optionA2:hover {
+    background: linear-gradient(135deg, rgba(135, 206, 235, 0.4), rgba(255, 255, 255, 0.2));
+}
+
+/* 选项B特定样式 */
+#optionB, #optionB2 {
+    background: linear-gradient(135deg, rgba(255, 105, 180, 0.2), rgba(255, 255, 255, 0.1));
+}
+
+#optionB:hover, #optionB2:hover {
+    background: linear-gradient(135deg, rgba(255, 105, 180, 0.4), rgba(255, 255, 255, 0.2));
+}
+
+/* 返回按钮样式 - 不需要太大 */
+.back-button {
+    margin-top: 20px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.back-button.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.back-button:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 3px 10px rgba(135, 206, 235, 0.4);
+}
+
+/* 文字淡入动画 */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 操控按钮容器 - 为触摸设备优化 */
 .controls {
     position: absolute;
     bottom: 10%;
@@ -305,52 +375,87 @@ body {
     display: flex;
     gap: 60px;
     z-index: 5;
+    /* 确保在所有设备上都可点击 */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 
+/* 优化跳跃按钮样式和触摸区域 */
 .jump-btn {
-    width: 60px;
-    height: 60px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     background-color: rgba(255, 255, 255, 0.1);
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 3px solid rgba(255, 255, 255, 0.3);
     color: white;
-    font-size: 1.5rem;
+    font-size: 2rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.1s ease;
     backdrop-filter: blur(5px);
+    /* 增加触摸区域 */
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* 移动设备触摸反馈 */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
+/* 鼠标悬停效果 */
 .jump-btn:hover {
     background-color: rgba(255, 255, 255, 0.2);
     transform: scale(1.1);
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
 }
 
+/* 触摸/点击效果 */
 .jump-btn:active {
     transform: scale(0.95);
+    background-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
 }
 
+/* 优化方向按钮样式和触摸区域 */
 .btn {
-    width: 60px;
-    height: 60px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     background-color: rgba(255, 255, 255, 0.1);
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 3px solid rgba(255, 255, 255, 0.3);
     color: white;
-    font-size: 1.5rem;
+    font-size: 2rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.1s ease;
     backdrop-filter: blur(5px);
+    /* 增加触摸区域 */
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* 移动设备触摸反馈 */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
+/* 鼠标悬停效果 */
 .btn:hover {
     background-color: rgba(255, 255, 255, 0.2);
     transform: scale(1.1);
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
 }
 
+/* 触摸/点击效果 */
 .btn:active {
     transform: scale(0.95);
+    background-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
 }
 
 /* 动画 */
@@ -367,13 +472,14 @@ body {
 /* 响应式调整 */
 @media (max-width: 768px) {
     .controls {
-        gap: 40px;
+        gap: 50px;
+        bottom: 15%; /* 增加底部边距，避免被设备UI遮挡 */
     }
     
     .btn, .jump-btn {
-        width: 50px;
-        height: 50px;
-        font-size: 1.2rem;
+        width: 70px;
+        height: 70px;
+        font-size: 1.8rem;
     }
     
     .player {
@@ -386,8 +492,72 @@ body {
         height: 25px;
     }
     
-    .light-spot {
+    .light-spot, .target-spot {
         width: 20px;
         height: 20px;
+    }
+    
+    /* 调整开始游戏界面文字大小 */
+    .start-game p {
+        font-size: clamp(1.2rem, 4vw, 1.8rem);
+        margin-top: 3rem;
+    }
+    
+    /* 调整开始文字大小 */
+    .start-text p {
+        font-size: clamp(1.2rem, 4vw, 1.8rem);
+        margin-bottom: 1.5rem;
+    }
+    
+    /* 优化问答界面在移动设备上的显示 */
+    .quiz-content {
+        width: 95%;
+        padding: 20px;
+    }
+    
+    .quiz-question {
+        font-size: 1.3rem;
+        margin-bottom: 20px;
+    }
+    
+    .quiz-option {
+        padding: 10px 15px;
+        font-size: 1rem;
+    }
+}
+
+/* 为更小的移动设备优化 */
+@media (max-width: 480px) {
+    .controls {
+        gap: 30px;
+        bottom: 20%; /* 进一步增加底部边距 */
+    }
+    
+    .btn, .jump-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+    
+    .player {
+        width: 25px;
+        height: 38px;
+    }
+    
+    .circle {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .light-spot, .target-spot {
+        width: 18px;
+        height: 18px;
+    }
+    
+    /* 进度圈位置调整 */
+    .progress-circles {
+        top: 8%;
+        right: 8%;
+        gap: 10px;
     }
 }
