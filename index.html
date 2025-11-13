@@ -50,16 +50,55 @@
         </div>
     </div>
 
-    <!-- 问答界面 -->
+    <!-- 第一个问答界面 -->
     <div class="quiz-modal" id="quizModal">
         <div class="quiz-content">
-            <div class="quiz-question">当你感到迷茫时，更倾向于？</div>
-            <div class="quiz-options">
-                <div class="quiz-option">独自思考，寻找内心答案</div>
-                <div class="quiz-option">向身边信任的人倾诉</div>
-                <div class="quiz-option">通过行动打破僵局</div>
-                <div class="quiz-option">暂时搁置，等待灵感</div>
+            <!-- 文字内容界面 -->
+            <div class="text-content" id="textContent">
+                <p>你听见风声，水声，鸟鸣，看见鬼魅般的光影穿梭在枝桠间。</p>
+                <p>微弱的萤火是黑夜的眼睛，握在手心却如河流淌。</p>
+                <p>不要害怕，穿过这片桦树林，你会相信外面是新世界吗？</p>
             </div>
+            
+            <!-- 选项界面 -->
+            <div class="quiz-options" id="quizOptions">
+                <div class="quiz-option" id="optionA">A. 相信</div>
+                <div class="quiz-option" id="optionB">B. 不相信</div>
+            </div>
+            
+            <!-- 返回按钮 -->
+            <button class="back-button" id="backButton">返回文字</button>
+        </div>
+    </div>
+    
+    <!-- 第二个问答界面 -->
+    <div class="quiz-modal" id="quizModal2">
+        <div class="quiz-content">
+            <!-- 文字内容界面 -->
+            <div class="text-content" id="textContent2">
+                <p>天色近暗，你停下脚步，坐在裸露的大树根系上，你看见一个人走来，雾岚弥漫，你怎么也看不清TA的面容，TA问你一个人吗？要一起走吗？</p>
+            </div>
+            
+            <!-- 选项界面 -->
+            <div class="quiz-options" id="quizOptions2">
+                <div class="quiz-option" id="optionA2">A. 可以</div>
+                <div class="quiz-option" id="optionB2">B. 不可以</div>
+            </div>
+            
+            <!-- 返回按钮 -->
+            <button class="back-button" id="backButton2">返回文字</button>
+        </div>
+    </div>
+
+    <!-- 假结局弹窗 -->
+    <div class="quiz-modal" id="badEndingModal">
+        <div class="quiz-content" id="badEndingContent">
+            <div class="text-content" id="badEndingText">
+                亲爱的，无论是你的高警惕性还是过人的智慧，我都相信你有足够的勇气与能力独自走出森林。<br><br>
+                祝你好运。<br><br>
+                恭喜你打出假结局1--【森林与独骑士】
+            </div>
+            <button class="back-button" id="badEndingBackButton">重新开始</button>
         </div>
     </div>
 
